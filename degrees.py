@@ -108,7 +108,9 @@ def shortest_path(source, target):
     while not frontier.empty():
         current: Node = frontier.remove()
 
-        nodes_db[current.state] = current
+        # nodes_db[current.state] = current
+        if current.state not in nodes_db:
+            nodes_db[current.state] = current
 
         if current.state == target:
             break
@@ -126,6 +128,8 @@ def shortest_path(source, target):
             )
 
             frontier.add(next_node)
+
+            nodes_db[next_node.state] = next_node
 
     if target not in nodes_db:
         return None
