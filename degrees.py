@@ -91,61 +91,83 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
-
+    # Stores states that we haven't explored yet
+    # Also defines our strategy for exploration
+    # In this case we are going DFS
     frontier = QueueFrontier()
 
+    # Store the initial state as a Node
     start_node: Node = Node(
         state=source,
         parent=None,
         action=None
     )
 
+    # Add initial state to frontier to explore
     frontier.add(start_node)
 
     # Dictionaries of {person_id: Node}
+    # We use this to check what states we've already explored
     nodes_db: dict = {}
 
+    # We loop until we no longer have any states to explore
     while not frontier.empty():
+        # Retrieve state to explore
         current: Node = frontier.remove()
 
-        # nodes_db[current.state] = current
+        # Store state in nodes_db if it hasn't been explored yet
         if current.state not in nodes_db:
             nodes_db[current.state] = current
 
+        # If the state we are exploring is our target, we stop the loop
         if current.state == target:
             break
 
         neighbors = neighbors_for_person(current.state)
 
+        # We loop through each neighbor and add it to the frontier to explore later
         for neighbor in neighbors:
+            # Avoid exploring the same state more than once
             if neighbor[1] in nodes_db:
                 continue
 
+            # Store state as a node
             next_node: Node = Node(
                 state=neighbor[1],
                 parent=current.state,
                 action=neighbor[0]
             )
 
+            # Add state to the frontier
             frontier.add(next_node)
 
+            # Store state in nodes_db
             nodes_db[next_node.state] = next_node
 
+    # Since we add all our explored state in nodes_db,
+    # we can be sure that if we haven't explored the target,
+    # there is no possible path to it from the source
     if target not in nodes_db:
         return None
 
+    # We backtrack starting from the target state
     current: Node = nodes_db[target]
 
     ret = []
 
+    # We loop until we are back to our initial state
     while current.state != start_node.state:
         person_id = current.state
         movie_id = current.action
 
         ret.append((movie_id, person_id))
 
+        # Follow the path that we used to get to the current state
         current = nodes_db[current.parent]
 
+    # Since we backtracked starting from target state,
+    # we now have to reverse it to make sure we present the
+    # path starting from the initial state
     ret.reverse()
 
     return ret
